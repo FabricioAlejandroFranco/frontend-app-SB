@@ -1,20 +1,16 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
+import Button from "./components/Button";
 
 import "./App.css";
 
 function App() {
   const [articles, setArticles] = useState([]);
-  const [tituloFiltradoMasDe5, setTituloFiltradoMasDe5] = useState([]);
-  const [tituloFiltradoMenosDe5, setTituloFiltradoMenosDe5] = useState([]);
+  const [filteredArticles, setFilteredArticles] = useState([]); //funcion para contar palabras en un texto
 
-  //funcion para contar palabras en un texto
-  const conteoPalabras = (elemento) => {
-    return elemento
-      .replace(/[^a-zA-Z\s]/g, "")
-      .trim()
-      .split(/\s+/).length;
-  };
+  useEffect(() => {
+    init();
+  }, []);
 
   const init = async () => {
     try {
@@ -23,45 +19,69 @@ function App() {
       const data = responseApi.data;
 
       setArticles(data);
-
-      const titulosMasDe5 = data
-        .filter((articulo) => conteoPalabras(articulo.title) > 5)
-        .sort((artA, artB) => {
-          const commentsA = parseInt(artA.numberComments.split(" ")[0]);
-          const commentsB = parseInt(artB.numberComments.split(" ")[0]);
-          return commentsB - commentsA;
-        });
-      setTituloFiltradoMasDe5(titulosMasDe5);
-
-      const titulosMenosDe5 = data
-        .filter((articulo) => conteoPalabras(articulo.title) <= 5)
-        .sort((artA, artB) => {
-          const pointsA = parseInt(artA.points.split(" ")[0]);
-          const pointsB = parseInt(artB.points.split(" ")[0]);
-          return pointsB - pointsA;
-        });
-      setTituloFiltradoMenosDe5(titulosMenosDe5);
-
-      console.log("setTituloFiltradoMasDe5", data);
+      setFilteredArticles(data);
     } catch (error) {
       console.error("Error fetching articles:", error);
     }
   };
 
-  useEffect(() => {
-    init();
-  }, []);
+  const conteoPalabras = (elemento) => {
+    return elemento
+      .replace(/[^a-zA-Z\s]/g, "")
+      .trim()
+      .split(/\s+/).length;
+  };
+
+  const FiltrarTitulosMasDeCinco = () => {
+    const titulosMasDe5 = articles
+      .filter((articulo) => conteoPalabras(articulo.title) > 5)
+      .sort((artA, artB) => {
+        // Se utiliza parseInt para convertir lo que devuelve el metodo split en la primera posicion del array
+        const commentsA = parseInt(artA.numberComments.split(" ")[0]);
+        const commentsB = parseInt(artB.numberComments.split(" ")[0]);
+        return commentsB - commentsA;
+      });
+    console.log("FiltrarTitulosMasDeCinco");
+    setFilteredArticles(titulosMasDe5);
+  };
+
+  const filtrarTitulosMenosDeCinco = () => {
+    const titulosMenosDe5 = articles
+      .filter((articulo) => conteoPalabras(articulo.title) <= 5)
+      .sort((artA, artB) => {
+        const pointsA = parseInt(artA.points.split(" ")[0]);
+        const pointsB = parseInt(artB.points.split(" ")[0]);
+        return pointsB - pointsA;
+      });
+    console.log("filtrarTitulosMenosDeCinco");
+    setFilteredArticles(titulosMenosDe5);
+  };
+  const resetArticles = () => {
+    setFilteredArticles(articles);
+  };
 
   return (
     <>
       <div>
-        <h1>Lista de Artículos</h1>
+        <div style={{ textAlign: "center" }}>
+          <h1>Lista de Artículos</h1>
+        </div>
+        <div className="container">
+          <Button onSelect={() => FiltrarTitulosMasDeCinco()}>
+            Filtrar mas de 5
+          </Button>
+          <Button onSelect={() => filtrarTitulosMenosDeCinco()}>
+            Filtrar menos de 5
+          </Button>
+          <Button onSelect={() => resetArticles()}>Reset</Button>
+        </div>
+
         <ul>
-          {articles.map((article, index) => (
+          {filteredArticles.map((article, index) => (
             <li key={index}>
-              <h3>
+              <p>
                 {article.number} {article.title}
-              </h3>
+              </p>
               <p>
                 <strong>Puntos:</strong> {article.points}
               </p>
@@ -72,46 +92,6 @@ function App() {
           ))}
         </ul>
       </div>
-
-      <p>
-        <h2>Articulos con mas de 5 palabras y ordenado por comentarios</h2>
-        <ul></ul>
-      </p>
-      <ul>
-        {tituloFiltradoMasDe5.map((article, index) => (
-          <li key={index}>
-            <h3>
-              {article.number} {article.title}
-            </h3>
-
-            <p>
-              <strong>Comentarios:</strong> {article.numberComments}
-            </p>
-          </li>
-        ))}
-      </ul>
-
-      <p>
-        <span>
-          Articulos con menos o igual a 5 palabras y ordenado por puntos
-        </span>
-        <ul></ul>
-      </p>
-      <ul>
-        {tituloFiltradoMenosDe5.map((article, index) => (
-          <li key={index}>
-            <h3>
-              {article.number} {article.title}
-            </h3>
-            <p>
-              <strong>Puntos:</strong> {article.points}
-            </p>
-            <p>
-              <strong>Comentarios:</strong> {article.numberComments}
-            </p>
-          </li>
-        ))}
-      </ul>
     </>
   );
 }
