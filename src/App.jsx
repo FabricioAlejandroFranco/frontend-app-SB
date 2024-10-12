@@ -11,7 +11,7 @@ export default function App() {
 
   let userName = "Fabricio";
   //extraigo los logs y y los convierto (JSON.parse)
-  const savedLogs = localStorage.getItem("logs");
+  const savedLogsFromLocal = localStorage.getItem("logs");
 
   useEffect(() => {
     const savedLogs = JSON.parse(localStorage.getItem("logs")) || [];
@@ -68,6 +68,7 @@ export default function App() {
 
   const resetArticles = () => {
     setFilteredArticles(articles);
+    setLogger([]);
   };
 
   const handleLogger = (userName, filterName) => {
@@ -107,14 +108,7 @@ export default function App() {
             </li>
           ))}
           <h3>Saved Log</h3>
-          <ul>
-            {savedLogs}
-            {/* {savedLogs.map((log, index) => (
-                <li key={index}>
-                  <a>{log}</a>
-                </li>
-              ))} */}
-          </ul>
+          <ul>{savedLogsFromLocal}</ul>
         </ul>
       </div>
       <div>
