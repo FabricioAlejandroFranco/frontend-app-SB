@@ -10,9 +10,12 @@ export default function App() {
   const [logger, setLogger] = useState([]);
 
   let userName = "Fabricio";
+  //extraigo los logs y y los convierto (JSON.parse)
   const savedLogs = localStorage.getItem("logs");
 
   useEffect(() => {
+    const savedLogs = JSON.parse(localStorage.getItem("logs")) || [];
+    setLogger(savedLogs);
     init();
   }, []);
 
@@ -47,10 +50,7 @@ export default function App() {
       });
 
     setFilteredArticles(titulosMasDe5);
-    handleLogger(
-      userName,
-      "filter entries with more than five words ordered by number of comments"
-    );
+    handleLogger(userName, "filter by number of comments");
   };
 
   const filtrarTitulosMenosDeCinco = () => {
@@ -63,57 +63,63 @@ export default function App() {
       });
 
     setFilteredArticles(titulosMenosDe5);
-    handleLogger(
-      userName,
-      "filter entries with less than or equal to five words ordered by points"
-    );
+    handleLogger(userName, "filter by points");
   };
 
   const resetArticles = () => {
     setFilteredArticles(articles);
-    setLogger([]);
   };
 
   const handleLogger = (userName, filterName) => {
     const date = new Date(Date.now());
-    console.log(date); // Log to console
     const message = `The User: ${userName} has selected the ${filterName} on ${date}`;
-    setLogger([...logger, message.toString()]);
-    saveLogsToLocalStorage(message);
+    //creo array
+    const updateLogs = [...logger, message];
+    localStorage.setItem("logs", JSON.stringify(updateLogs));
+    // envio mensaje y seteo estado
+    saveLogsToLocalStorage(updateLogs);
+    setLogger(updateLogs);
   };
 
   const saveLogsToLocalStorage = (message) => {
-    const updateLog = [...logger, message];
-    localStorage.setItem("logs", updateLog);
+    //convierto message to string
+    localStorage.setItem("logs", JSON.stringify(message));
   };
-
+  // console.log("loggeer state", logger);
+  // console.log("saved log", savedLogs);
   return (
     <>
+      <div className="container">
+        <Button onSelect={() => FiltrarTitulosMasDeCinco()}>
+          Filter articles by number of comments.
+        </Button>
+        <Button onSelect={() => filtrarTitulosMenosDeCinco()}>
+          Filter articles by points.
+        </Button>
+        <Button onSelect={() => resetArticles()}>Reset</Button>
+      </div>
+      <div>
+        <h3>Log of selected filters by User:</h3>
+        <ul>
+          {logger.map((log, index) => (
+            <li key={index}>
+              <a>{log}</a>
+            </li>
+          ))}
+          <h3>Saved Log</h3>
+          <ul>
+            {savedLogs}
+            {/* {savedLogs.map((log, index) => (
+                <li key={index}>
+                  <a>{log}</a>
+                </li>
+              ))} */}
+          </ul>
+        </ul>
+      </div>
       <div>
         <div style={{ textAlign: "center" }}>
           <h1>Articles</h1>
-        </div>
-        <div className="container">
-          <Button onSelect={() => FiltrarTitulosMasDeCinco()}>
-            Filter entries with more than 5 words in title by number of
-            comments.
-          </Button>
-          <Button onSelect={() => filtrarTitulosMenosDeCinco()}>
-            Filter entries less or equal than 5 words in title by points.
-          </Button>
-          <Button onSelect={() => resetArticles()}>Reset</Button>
-        </div>
-        <div>
-          <h3>Log of selected filters by User:</h3>
-          <ul>
-            {logger.map((log, index) => (
-              <li key={index}>
-                <a>{log}</a>
-              </li>
-            ))}
-            <h3>Saved Log</h3>
-            <li>{savedLogs}</li>
-          </ul>
         </div>
         <ul>
           {filteredArticles.map((article, index) => (
