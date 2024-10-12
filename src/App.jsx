@@ -6,10 +6,12 @@ import "./App.css";
 
 export default function App() {
   const [articles, setArticles] = useState([]);
-  const [filteredArticles, setFilteredArticles] = useState([]); //funcion para contar palabras en un texto
+  const [filteredArticles, setFilteredArticles] = useState([]);
   const [logger, setLogger] = useState([]);
+
   let userName = "Fabricio";
   const savedLogs = localStorage.getItem("logs");
+
   useEffect(() => {
     init();
   }, []);
@@ -77,7 +79,7 @@ export default function App() {
     console.log(date); // Log to console
     const message = `The User: ${userName} has selected the ${filterName} on ${date}`;
     setLogger([...logger, message.toString()]);
-    saveLogsToLocalStorage("logs", message);
+    saveLogsToLocalStorage(message);
   };
 
   const saveLogsToLocalStorage = (message) => {
