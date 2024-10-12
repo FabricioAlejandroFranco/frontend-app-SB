@@ -4,10 +4,12 @@ import Button from "./components/Button";
 
 import "./App.css";
 
-function App() {
+export default function App() {
   const [articles, setArticles] = useState([]);
   const [filteredArticles, setFilteredArticles] = useState([]); //funcion para contar palabras en un texto
-
+  const [logger, setLogger] = useState([]);
+  let userName = "Fabricio";
+  const savedLogs = localStorage.getItem("logs");
   useEffect(() => {
     init();
   }, []);
@@ -41,8 +43,12 @@ function App() {
         const commentsB = parseInt(artB.numberComments.split(" ")[0]);
         return commentsB - commentsA;
       });
-    console.log("FiltrarTitulosMasDeCinco");
+
     setFilteredArticles(titulosMasDe5);
+    handleLogger(
+      userName,
+      "filter entries with more than five words ordered by number of comments"
+    );
   };
 
   const filtrarTitulosMenosDeCinco = () => {
@@ -53,29 +59,60 @@ function App() {
         const pointsB = parseInt(artB.points.split(" ")[0]);
         return pointsB - pointsA;
       });
-    console.log("filtrarTitulosMenosDeCinco");
+
     setFilteredArticles(titulosMenosDe5);
+    handleLogger(
+      userName,
+      "filter entries with less than or equal to five words ordered by points"
+    );
   };
+
   const resetArticles = () => {
     setFilteredArticles(articles);
+    setLogger([]);
+  };
+
+  const handleLogger = (userName, filterName) => {
+    const date = new Date(Date.now());
+    console.log(date); // Log to console
+    const message = `The User: ${userName} has selected the ${filterName} on ${date}`;
+    setLogger([...logger, message.toString()]);
+    saveLogsToLocalStorage("logs", message);
+  };
+
+  const saveLogsToLocalStorage = (message) => {
+    const updateLog = [...logger, message];
+    localStorage.setItem("logs", updateLog);
   };
 
   return (
     <>
       <div>
         <div style={{ textAlign: "center" }}>
-          <h1>Lista de Artículos</h1>
+          <h1>Articles</h1>
         </div>
         <div className="container">
           <Button onSelect={() => FiltrarTitulosMasDeCinco()}>
-            Filtrar mas de 5
+            Filter entries with more than 5 words in title by number of
+            comments.
           </Button>
           <Button onSelect={() => filtrarTitulosMenosDeCinco()}>
-            Filtrar menos de 5
+            Filter entries less or equal than 5 words in title by points.
           </Button>
           <Button onSelect={() => resetArticles()}>Reset</Button>
         </div>
-
+        <div>
+          <h3>Log of selected filters by User:</h3>
+          <ul>
+            {logger.map((log, index) => (
+              <li key={index}>
+                <a>{log}</a>
+              </li>
+            ))}
+            <h3>Saved Log</h3>
+            <li>{savedLogs}</li>
+          </ul>
+        </div>
         <ul>
           {filteredArticles.map((article, index) => (
             <li key={index}>
@@ -83,10 +120,10 @@ function App() {
                 {article.number} {article.title}
               </p>
               <p>
-                <strong>Puntos:</strong> {article.points}
+                <strong>Points:</strong> {article.points}
               </p>
               <p>
-                <strong>Comentarios:</strong> {article.numberComments}
+                <strong>Comments:</strong> {article.numberComments}
               </p>
             </li>
           ))}
@@ -95,4 +132,3 @@ function App() {
     </>
   );
 }
-export default App;
